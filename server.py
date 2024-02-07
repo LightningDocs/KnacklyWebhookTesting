@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 
 
-@app.route("/webhook", methods=["POST"])
+@app.route("/", methods=["POST"])
 def handle_webhook():
     # Get the JSON data sent by the webhook
     data = request.json
@@ -13,6 +13,7 @@ def handle_webhook():
     # Process the data, store it, or trigger specific actions based on the event
     print("Received webhook data:")
     print(data)
+    print(type(data))
     print("-" * 25)
 
     # Respond with a success message

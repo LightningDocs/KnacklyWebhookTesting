@@ -52,7 +52,9 @@ class KnacklyAPI:
             id = wh["id"]
             self.unregister_webhook(id)
 
-    def register_webhook(self, url: str, events: list[str], catalogs: list[str]):
+    def register_webhook(
+        self, webhook_url: str, events: list[str], catalogs: list[str]
+    ):
         """Registers a webhook with the API
 
         Args:
@@ -61,7 +63,7 @@ class KnacklyAPI:
             catalogs (list[str]): Each element is a string with the name of the catalog that this webhook shouhld fire on. Optionally, just sending the one element list ["all"] will indicate all catalogs.
         """
         url = f"{self.base_url}/webhooks"
-        payload = {"url": url, "events": events, "catalogs": catalogs}
+        payload = {"url": webhook_url, "events": events, "catalogs": catalogs}
         r = requests.post(url, headers=self.authorization_header, data=payload)
 
         if r.status_code == 400:
@@ -86,12 +88,12 @@ if __name__ == "__main__":
         print("[]")
 
     # Register any webhooks
-    registered = test_api_client.register_webhook(
-        url="https://webhook.site/9aaa1d92-f70d-4f48-b767-45fc5c04a26b",
-        events=["catalog.app.completed"],
-        catalogs=["MasterLoanDocs"],
-    )
-    print(registered)
+    # registered = test_api_client.register_webhook(
+    #     webhook_url="https://thorough-quail-wildly.ngrok-free.app",
+    #     events=["catalog.app.completed"],
+    #     catalogs=["MasterLoanDocs"],
+    # )
+    # print(registered)
 
     # Remove a webhook
     # removed = test_api_client.unregister_webhook(id="65c2d8550c89ea9f50efacef")
