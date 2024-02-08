@@ -72,6 +72,20 @@ class KnacklyAPI:
             raise RuntimeError(f"something went wrong: {r.text}")
         return r.json()
 
+    def get_record_details(self, record_id: str, catalog: str) -> dict:
+        """Query's the Knackly API for information regarding a specific record
+
+        Args:
+            record_id (str): The unique id of the record, typically gotten from a webhook event firing
+            catalog (str): The catalog that the record resides in
+
+        Returns:
+            dict: A python object containing information about the record
+        """
+        url = f"{self.base_url}/catalogs/{catalog}/items/{record_id}"
+        r = requests.get(url, headers=self.authorization_header)
+        return r.json()
+
 
 if __name__ == "__main__":
     # Create an API client
