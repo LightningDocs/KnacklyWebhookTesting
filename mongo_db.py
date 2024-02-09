@@ -7,7 +7,7 @@ class MongoDB:
     ) -> None:
         try:
             client = pymongo.MongoClient(
-                f"mongodb+srv://{username}:{password}:{cluster}"
+                f"mongodb+srv://{username}:{password}@{cluster}/?retryWrites=true&w=majority"
             )
             print("Successfully connected to MongoDB.")
             self._client = client
