@@ -1,7 +1,7 @@
 import requests
 
 
-import config
+from config import ACCESS_KEY, ACCESS_SECRET, TENANCY
 
 
 class KnacklyAPI:
@@ -53,18 +53,27 @@ class KnacklyAPI:
             self.unregister_webhook(id)
 
     def register_webhook(
-        self, webhook_url: str, events: list[str], catalogs: list[str]
+        self,
+        webhook_url: str,
+        events: list[str],
+        catalogs: list[str],
+        custom_headers: dict = None,
     ):
         """Registers a webhook with the API
 
         Args:
             url (str): The HTTPS server to which the webhook will post data to
             events (list[str]): Each element is a string with the name of an event you want to be notified of. Currently only supports "catalog.app.completed"
-            catalogs (list[str]): Each element is a string with the name of the catalog that this webhook shouhld fire on. Optionally, just sending the one element list ["all"] will indicate all catalogs.
+            catalogs (list[str]): Each element is a string with the name of the catalog that this webhook shouhld fire on. Optionally, just sending the one element list ["all"] will indicate all catalogs
+            custom_headers: (dict): Optional python object where each key is a valid name for an HTTP header, and the value is a string that Knackly will send with that header
         """
         url = f"{self.base_url}/webhooks"
         payload = {"url": webhook_url, "events": events, "catalogs": catalogs}
-        r = requests.post(url, headers=self.authorization_header, data=payload)
+        if custom_headers:
+            payload["customHeaders"] = custom_headers
+
+        r = requests.post(url, headers=self.authorization_header, json=payload)
+        self.pretty_print_request_details(r.request)
 
         if r.status_code == 400:
             raise RuntimeError(f"something went wrong: {r.text}")
@@ -86,11 +95,26 @@ class KnacklyAPI:
         r = requests.get(url, headers=self.authorization_header)
         return r.json()
 
+    def pretty_print_request_details(self, req: requests.Request) -> None:
+        """Helper function to print out the full information that python is sending to the server
+
+        Args:
+            req (requests.Request): A python Request object
+        """
+        print(
+            "{}\n{}\r\n{}\r\n\r\n{}".format(
+                "-----------START-----------",
+                req.method + " " + req.url,
+                "\r\n".join("{}: {}".format(k, v) for k, v in req.headers.items()),
+                req.body,
+            )
+        )
+
 
 if __name__ == "__main__":
     # Create an API client
     test_api_client = KnacklyAPI(
-        key_id=config.ACCESS_KEY, secret=config.ACCESS_SECRET, tenancy=config.TENANCY
+        key_id=ACCESS_KEY, secret=ACCESS_SECRET, tenancy=TENANCY
     )
 
     # Get all webhooks
@@ -102,12 +126,13 @@ if __name__ == "__main__":
         print("[]")
 
     # Register any webhooks
-    # registered = test_api_client.register_webhook(
-    #     webhook_url="https://thorough-quail-wildly.ngrok-free.app",
-    #     events=["catalog.app.completed"],
-    #     catalogs=["MasterLoanDocs"],
-    # )
-    # print(registered)
+    registered = test_api_client.register_webhook(
+        webhook_url="https://thorough-quail-wildly.ngrok-free.app",
+        events=["catalog.app.completed"],
+        catalogs=["MasterLoanDocs", "Transactional"],
+        custom_headers={"X-My-Custom-Header": "abc123"},
+    )
+    print(registered)
 
     # Remove a webhook
     # removed = test_api_client.unregister_webhook(id="65c2d8550c89ea9f50efacef")

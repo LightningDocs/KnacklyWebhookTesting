@@ -11,10 +11,8 @@ def handle_webhook():
 
     # Handle the webhook data as needed
     # Process the data, store it, or trigger specific actions based on the event
-    print("Received webhook data:")
-    print(data)
-    print(type(data))
-    print("-" * 25)
+    print(f"Received webhook data: {data}")
+    print(f"{request.headers.get('X-My-Custom-Header') = }")
 
     # Respond with a success message
     return jsonify({"message": "Webhook received successfully"}), 200
