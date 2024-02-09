@@ -1,9 +1,6 @@
 import requests
 
 
-from config import ACCESS_KEY, ACCESS_SECRET, TENANCY
-
-
 class KnacklyAPI:
     def __init__(self, key_id: str, secret: str, tenancy: str):
         self.key_id = key_id
@@ -109,34 +106,3 @@ class KnacklyAPI:
                 req.body,
             )
         )
-
-
-if __name__ == "__main__":
-    # Create an API client
-    test_api_client = KnacklyAPI(
-        key_id=ACCESS_KEY, secret=ACCESS_SECRET, tenancy=TENANCY
-    )
-
-    # Get all webhooks
-    all_webhooks = test_api_client.get_webhooks()
-    print("All webhooks:")
-    for wh in all_webhooks:
-        print(wh)
-    if len(all_webhooks) == 0:
-        print("[]")
-
-    # Register any webhooks
-    registered = test_api_client.register_webhook(
-        webhook_url="https://thorough-quail-wildly.ngrok-free.app",
-        events=["catalog.app.completed"],
-        catalogs=["MasterLoanDocs", "Transactional"],
-        custom_headers={"X-My-Custom-Header": "abc123"},
-    )
-    print(registered)
-
-    # Remove a webhook
-    # removed = test_api_client.unregister_webhook(id="65c2d8550c89ea9f50efacef")
-    # print(removed)
-
-    # Remove all webhooks
-    # test_api_client.unregister_all_webhooks()
