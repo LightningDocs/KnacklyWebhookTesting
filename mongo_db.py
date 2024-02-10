@@ -77,6 +77,46 @@ class MongoDB:
             f"Successfully created new index `{new_index}` in collection `{collection}`"
         )
 
+    def create_compound_index(
+        self, keys: list[tuple[str, str]], collection: str
+    ) -> None:
+        """Create a compound index on a specific collection.
+
+        Args:
+            keys (list[tuple[str, str]]): List of 2-tuples in the format (field, sort_direction) where the field is the name of a document field, and sort_direction is either `ASCENDING` or `DESCENDING`
+            collection (str): The name of the collection that this index should be made inside of
+        """
+        col = self._db[collection]
+
+        # Verify that the sort_directions were valid
+        if any(direction not in ["ASCENDING", "DESCENDING"] for _, direction in keys):
+            raise ValueError(
+                "Invalid sort direction provided. Must be either `ASCENDING` or `DESCENDING`."
+            )
+
+        # Construct the index name
+        keys = [
+            (
+                field,
+                (
+                    pymongo.ASCENDING
+                    if sort_direction == "ASCENDING"
+                    else pymongo.DESCENDING
+                ),
+            )
+            for field, sort_direction in keys
+        ]
+        index_names = [f"{field}_{sort_direction}" for field, sort_direction in keys]
+        compound_index_name = "_".join(index_names)
+
+        # Check if the index already exists
+        if compound_index_name in col.index_information():
+            raise RuntimeError(f"Index `{compound_index_name} already exists.`")
+
+        # If it doesn't, then create the new index
+        new_index = col.create_index(keys)
+        return new_index
+
     def insert(self, collection: str, document: dict) -> None:
         """Inserts a document to a specific collection.
 
@@ -84,7 +124,8 @@ class MongoDB:
             collection (str): The name of the collection that the document should be inserted into
             document (dict): The document itself. Should be a python dictionary object
         """
-        pass
+        col = self._db[collection]
+        col.insert_one(document)
 
     def find(self, collection: str, query: dict) -> dict:
         """Finds and returns a single document from the collection, if possible.

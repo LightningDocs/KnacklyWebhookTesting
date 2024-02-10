@@ -10,6 +10,7 @@ Set-ExecutionPolicy Unrestricted -Scope Process
 python server.py
 ```
 or
+
 ```bash
 flask --app server.py --debug run
 ```
