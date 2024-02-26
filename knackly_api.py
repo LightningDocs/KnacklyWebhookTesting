@@ -10,6 +10,7 @@ class KnacklyAPI:
         self.authorization_header = {
             "Authorization": f"Bearer {self.get_access_token() }"
         }
+        print("Successfully connected to Knackly.")
 
     def get_access_token(self) -> str:
         """Get an access token needed for other Knackly API requests.

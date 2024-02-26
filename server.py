@@ -63,7 +63,11 @@ def handle_webhook():
     mongo_client.insert(collection="test_Events", document=event_data)
 
     # Insert the record data into our records database
-    mongo_client.insert(collection="test_Records", document=record_data)
+    mongo_client.replace(
+        collection="test_Records",
+        document=record_data,
+        filter={"id": record_data["id"]},
+    )
 
     # Respond with a success message
     return jsonify({"message": "Webhook received successfully"}), 200

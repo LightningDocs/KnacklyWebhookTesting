@@ -136,7 +136,7 @@ class MongoDB:
             filter (dict): A filter document. This contains the keys/values that the document must match in order to be replaced
         """
         col = self._db[collection]
-        col.replace_one(filter, document, upser=True)
+        col.replace_one(filter, document, upsert=True)
 
     def find(self, collection: str, query: dict) -> dict:
         """Finds and returns a single document from the collection, if possible.
