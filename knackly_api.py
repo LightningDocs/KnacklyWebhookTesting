@@ -6,7 +6,7 @@ class KnacklyAPI:
         self.key_id = key_id
         self.secret = secret
         self.tenancy = tenancy
-        self.base_url = f"https://api.test.go.knackly.io/{tenancy}/api/v1"
+        self.base_url = f"https://api.knackly.io/{tenancy}/api/v1"
         self.authorization_header = {
             "Authorization": f"Bearer {self.get_access_token() }"
         }
