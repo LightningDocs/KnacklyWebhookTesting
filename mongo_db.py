@@ -127,6 +127,17 @@ class MongoDB:
         col = self._db[collection]
         col.insert_one(document)
 
+    def replace(self, collection: str, document: dict, filter: dict) -> None:
+        """Replaces a document in a specific collection if one is found, otherwise just inserts the document.
+
+        Args:
+            collection (str): The name of the collection that the document should be placed into
+            document (dict): The document itself. Should be a python dictionary object
+            filter (dict): A filter document. This contains the keys/values that the document must match in order to be replaced
+        """
+        col = self._db[collection]
+        col.replace_one(filter, document, upser=True)
+
     def find(self, collection: str, query: dict) -> dict:
         """Finds and returns a single document from the collection, if possible.
 

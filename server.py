@@ -39,7 +39,7 @@ def handle_webhook():
     )
 
     # Handle the webhook data as needed
-    # print(f"Received webhook data: {event_data}")
+    print(f"Received webhook data: {event_data}")
 
     record_data = api_client.get_record_details(
         record_id=event_data["record"], catalog=event_data["catalog"]
@@ -50,10 +50,20 @@ def handle_webhook():
     if mongo_client.find("test_Events", events_query):
         pass  # Do something
     else:
-        pass  # Do something else
+        record_apps = record_data[
+            "apps"
+        ]  # This has to have a length of at least 1, otherwise the webhook would have never been sent.
+        for idx, app in enumerate(record_apps):
+            # Inject the current date/time into each app as LD_creationDate
+            record_data["apps"][idx]["LD_creationDate"] = (
+                current_datetime.isoformat(timespec="milliseconds") + "Z"
+            )
 
     # Insert the webhook data into our events database
     mongo_client.insert(collection="test_Events", document=event_data)
+
+    # Insert the record data into our records database
+    mongo_client.insert(collection="test_Records", document=record_data)
 
     # Respond with a success message
     return jsonify({"message": "Webhook received successfully"}), 200
