@@ -46,7 +46,7 @@ class MongoDB:
             )
 
     def create_new_index(
-        self, field: str, sort_direction: str, collection: str
+        self, field: str, sort_direction: str, collection: str, is_unique: bool
     ) -> None:
         """Create an index on a specific collection.
 
@@ -72,7 +72,7 @@ class MongoDB:
             raise RuntimeError(f"Index `{index_name}` already exists.")
 
         # If it doesn't, then create the new index
-        new_index = col.create_index([(field, sort_direction)], unique=True)
+        new_index = col.create_index([(field, sort_direction)], unique=is_unique)
         print(
             f"Successfully created new index `{new_index}` in collection `{collection}`"
         )
