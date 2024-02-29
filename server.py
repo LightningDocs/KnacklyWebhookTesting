@@ -44,6 +44,7 @@ def handle_webhook():
     knackly_record = api_client.get_record_details(
         record_id=event_data["record"], catalog=event_data["catalog"]
     )
+    knackly_record["LD_catalog"] = event_data["catalog"]
 
     # record "id" already in mongo records collection?
     records_query = {"id": event_data["record"]}
@@ -55,6 +56,11 @@ def handle_webhook():
         document=knackly_record,
         app_name=event_data["app"],
         created_date=current_datetime.isoformat(timespec="milliseconds") + "Z",
+    )
+    modified_knackly_record = inject_user_type(
+        document=modified_knackly_record,
+        app_name=event_data["app"],
+        user_type=event_data["userType"],
     )
 
     # Insert the webhook data into our events database
@@ -110,6 +116,28 @@ def inject_created_date(document: dict, app_name: str, created_date: str) -> dic
             # Only "inject" if there wasn't already an LD_createdDate
             if app.get("LD_createdDate") is None:
                 app["LD_createdDate"] = created_date
+            return document
+    raise IndexError(
+        f"No app found with name {app_name}. Found apps were {','.join([app['name'] for app in document['apps']])}"
+    )
+
+
+def inject_user_type(document: dict, app_name: str, user_type: str) -> dict:
+    """Injects the provided user_type (regular/external/api) into a specific app for a document. If there already existed one for the provided app, do nothing.
+
+    Args:
+        document (dict): The entire knackly document
+        app_name (str): The name of the app to apply the user_type to
+        user_type (str): The type of user that ran the app. Either 'regular', 'external', or'api'
+
+    Returns:
+        dict: The newly modified document
+    """
+    for app in document["apps"]:
+        if app["name"] == app_name:
+            # Only "inject" if there wasn't already an LD_userType
+            if app.get("LD_userType") is None:
+                app["LD_userType"] = user_type
             return document
     raise IndexError(
         f"No app found with name {app_name}. Found apps were {','.join([app['name'] for app in document['apps']])}"
