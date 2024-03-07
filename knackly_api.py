@@ -91,6 +91,10 @@ class KnacklyAPI:
         """
         url = f"{self.base_url}/catalogs/{catalog}/items/{record_id}"
         r = requests.get(url, headers=self.authorization_header)
+        if r.status_code == 400 or r.status_code == 403:
+            raise RuntimeError(
+                f"{r.status_code}: something went wrong while trying to get {record_id} in {catalog}: {r.text}"
+            )
         return r.json()
 
     def pretty_print_request_details(self, req: requests.Request) -> None:
