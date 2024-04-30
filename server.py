@@ -1,3 +1,4 @@
+from pprint import pprint
 from flask import Flask, request, jsonify
 from datetime import datetime, timezone
 
@@ -44,11 +45,13 @@ def handle_webhook():
     knackly_record = api_client.get_record_details(
         record_id=event_data["record"], catalog=event_data["catalog"]
     )
+    pprint(knackly_record)
+    print()
     knackly_record["LD_catalog"] = event_data["catalog"]
 
     # record "id" already in mongo records collection?
     records_query = {"id": event_data["record"]}
-    previous_record = mongo_client.find("test_Records", records_query)
+    previous_record = mongo_client.find("Records", records_query)
     if previous_record:
         knackly_record = copy_created_dates(previous_record, knackly_record)
 
@@ -64,11 +67,11 @@ def handle_webhook():
     )
 
     # Insert the webhook data into our events database
-    mongo_client.insert(collection="test_Events", document=event_data)
+    mongo_client.insert(collection="Events", document=event_data)
 
     # Insert the record data into our records database
     mongo_client.replace(
-        collection="test_Records",
+        collection="Records",
         document=modified_knackly_record,
         filter={"id": modified_knackly_record["id"]},
     )
