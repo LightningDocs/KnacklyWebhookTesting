@@ -1,4 +1,3 @@
-from pprint import pprint
 from flask import Flask, request, jsonify
 from datetime import datetime, timezone
 
@@ -45,8 +44,8 @@ def handle_webhook():
     knackly_record = api_client.get_record_details(
         record_id=event_data["record"], catalog=event_data["catalog"]
     )
-    pprint(knackly_record)
-    print()
+    # pprint(knackly_record)
+    # print()
     knackly_record["LD_catalog"] = event_data["catalog"]
 
     # record "id" already in mongo records collection?
