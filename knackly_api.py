@@ -71,7 +71,7 @@ class KnacklyAPI:
             payload["customHeaders"] = custom_headers
 
         r = requests.post(url, headers=self.authorization_header, json=payload)
-        self.pretty_print_request_details(r.request)
+        # self.pretty_print_request_details(r.request)
 
         if r.status_code == 400:
             raise RuntimeError(f"something went wrong: {r.text}")

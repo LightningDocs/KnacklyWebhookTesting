@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 
 
 from knackly_api import KnacklyAPI
@@ -33,13 +33,17 @@ def handle_webhook():
 
     # Get the JSON data sent by the webhook
     event_data = request.json
-    current_datetime = datetime.utcnow().replace(tzinfo=timezone.utc)
-    event_data["LD_createdDate"] = (
-        current_datetime.isoformat(timespec="milliseconds") + "Z"
-    )
+    current_datetime = datetime.now(UTC)
+    event_data["LD_createdDate"] = current_datetime.isoformat(
+        timespec="milliseconds"
+    ).replace("+00:00", "Z")
 
     # Handle the webhook data as needed
-    print(f"Received webhook data: {event_data}")
+    if request.headers.getlist("X-Forwarded-For"):
+        ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        ip = request.remote_addr
+    print(f"Received webhook data: {event_data}, Request IP: {ip}")
 
     knackly_record = api_client.get_record_details(
         record_id=event_data["record"], catalog=event_data["catalog"]
@@ -57,7 +61,9 @@ def handle_webhook():
     modified_knackly_record = inject_created_date(
         document=knackly_record,
         app_name=event_data["app"],
-        created_date=current_datetime.isoformat(timespec="milliseconds") + "Z",
+        created_date=current_datetime.isoformat(timespec="milliseconds").replace(
+            "+00:00", "Z"
+        ),
     )
     modified_knackly_record = inject_user_type(
         document=modified_knackly_record,
